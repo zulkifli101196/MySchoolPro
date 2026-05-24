@@ -92,9 +92,10 @@
     <i class="fa fa-times btn-close-sidebar" onclick="toggleSidebar()"></i>
     <div class="mb-5 px-2"><h4 class="fw-800 text-white mb-0">MySchool PRO</h4><span class="badge bg-primary" style="font-size: 10px;">Edition 2026</span></div>
     <button class="nav-item-custom active" onclick="nav('sc-home', this)"><i class="fa fa-chart-line me-2"></i> Dashboard</button>
-    <button id="menu-cuti-user" class="nav-item-custom d-none" onclick="nav('sc-cuti', this)"><i class="fa fa-calendar-plus me-2"></i> Ajukan Cuti</button>
+    <button id="menu-cuti-user" class="nav-item-custom d-none" onclick="nav('sc-cuti', this)"><i class="fa fa-calendar-plus me-2"></i> Cuti</button>
     <button class="nav-item-custom" onclick="nav('sc-absen', this)"><i class="fa fa-fingerprint me-2"></i> Presensi</button>
 	<button id="menu-presensi-siswa" class="nav-item-custom d-none" onclick="nav('sc-presensi-siswa', this)"><i class="fa fa-user-check me-2"></i> Presensi Siswa</button>
+	<button id="menu-spp-siswa" class="nav-item-custom d-none" onclick="nav('sc-spp', this)"><i class="fa fa-wallet me-2"></i> SPP</button>  
     <button class="nav-item-custom" onclick="nav('sc-self', this)"><i class="fa fa-user-gear me-2"></i> Profile</button>
     <div id="nav-admin" class="d-none">
       <hr class="opacity-10 my-4">
@@ -108,8 +109,9 @@
         <button class="nav-item-custom small py-2" onclick="nav('sc-master', this); loadTable('Data_Karyawan')"><i class="fa fa-user-tie me-2"></i> Data Karyawan</button>
         <button class="nav-item-custom small py-2" onclick="nav('sc-master', this); loadTable('Data_Siswa')"><i class="fa fa-user-graduate me-2"></i> Data Siswa</button>
       </div>
-      <button class="nav-item-custom" onclick="nav('sc-approval-cuti', this); loadApprovalCuti()"><i class="fa fa-check-double me-2"></i> Approval Cuti</button>
-      <button class="nav-item-custom" onclick="nav('sc-users', this); loadTable('User_Admin')"><i class="fa fa-users-cog me-2"></i> Pengaturan Users</button>
+      <button class="nav-item-custom" onclick="nav('sc-approval-cuti', this); loadApprovalCuti()"><i class="fa fa-check-double me-2"></i> Cuti</button>
+	  <button class="nav-item-custom" onclick="nav('sc-spp', this); inisialisasiMenuSPP()"><i class="fa fa-calculator me-2"></i> SPP</button>
+      <button class="nav-item-custom" onclick="nav('sc-users', this); loadTable('User_Admin')"><i class="fa fa-users-cog me-2"></i> Manage Admin</button>
       <button class="nav-item-custom" onclick="nav('sc-rekap', this); loadRekap()"><i class="fa fa-file-export me-2"></i> Rekap Absensi</button>
     </div>
     <div class="mt-auto p-3"> 
@@ -392,7 +394,6 @@
             <input type="text" id="siswa-search" class="form-control border-start-0" placeholder="Cari nama atau NIS..." onkeyup="currentPageMaster=1; renderPresensiSiswaTable()">
           </div>
         </div>
-        <!-- Filter Dropdown Unit Dinamis -->
         <div class="col-md-2">
           <select id="siswa-filter-unit" class="form-select form-select-sm" onchange="currentPageMaster=1; renderPresensiSiswaTable()">
             <option value="all">Semua Unit</option>
@@ -445,6 +446,140 @@
     <span id="siswa-page-info" class="small text-muted fw-bold"></span>
   </div>
 </section>
+<section id="sc-spp" class="d-none p-3">
+  <div class="container-fluid p-0"> 
+      <div id="panel-admin-spp" class="card shadow mb-4">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+              <h5 class="mb-0" id="title-panel-spp"><i class="fas fa-calculator me-2"></i>Form Pembayaran SPP</h5>
+              </div>
+          <div class="card-body">
+              <form id="form-bayar-spp" onsubmit="handleBayarSPP(event)">
+                  <div class="row g-3">
+                      <div class="col-md-3" id="col-spp-nis">
+                          <label class="form-label fw-bold">NIS</label>
+                          <input type="text" id="spp-nis" class="form-control" placeholder="Ketik NIS..." required onchange="cariSiswaOtomatis()">
+                      </div>
+                      <div class="col-md-3" id="col-spp-nama">
+                          <label class="form-label">Nama</label>
+                          <input type="text" id="spp-nama" class="form-control" placeholder="..." required readonly>
+                      </div>
+                      
+                      <div class="col-md-3">
+                          <label class="form-label fw-bold">Unit</label>
+                          <select id="spp-unit" class="form-select" required>
+                              <option value="">-- Pilih Unit --</option>
+                          </select>
+                      </div>
+                      <div class="col-md-3">
+                          <label class="form-label fw-bold">Kelas</label>
+                          <select id="spp-kelas" class="form-select" required>
+                              <option value="">-- Pilih Kelas --</option>
+                          </select>
+                      </div>  
+                      <div class="col-md-4">
+                          <label class="form-label fw-bold">Bulan Tagihan</label>
+                          <select id="spp-bulan" class="form-select" required>
+                              <option value="">-- Pilih Bulan --</option>
+                              <option value="Januari">Januari</option>
+                              <option value="Februari">Februari</option>
+                              <option value="Maret">Maret</option>
+                              <option value="April">April</option>
+                              <option value="Mei">Mei</option>
+                              <option value="Juni">Juni</option>
+                              <option value="Juli">Juli</option>
+                              <option value="Agustus">Agustus</option>
+                              <option value="September">September</option>
+                              <option value="Oktober">Oktober</option>
+                              <option value="November">November</option>
+                              <option value="Desember">Desember</option>
+                          </select>
+                      </div>
+                      <div class="col-md-4">
+                          <label class="form-label fw-bold">Nominal Pembayaran (Rp)</label>
+                          <input type="number" id="spp-nominal" class="form-control" placeholder="Cth: 250000" required>
+                      </div>
+                      <div class="col-md-4">
+                          <label class="form-label fw-bold">Metode / Jenis Pembayaran</label>
+                          <select id="spp-metode" class="form-select" required onchange="toggleUploadBukti()">
+                              <option value="Cash / Tunai">Cash / Tunai</option>
+                              <option value="Transfer Bank">Transfer Bank</option>
+                              <option value="Qris">Qris</option>
+                          </select>
+                      </div>
+                      
+                      <div class="col-md-12 d-none" id="row-bukti-transfer">
+                          <label class="form-label fw-bold text-danger">Upload File Bukti Pembayaran *</label>
+                          <input type="file" id="spp-file" class="form-control" accept="image/*">
+                      </div>
+                      
+                      <div class="col-md-12 text-end mt-3">
+                          <button type="submit" id="btn-simpan-spp" class="btn btn-success px-4">
+                              <span id="spp-loading" class="spinner-border spinner-border-sm d-none me-2"></span>
+                              <span id="text-btn-spp">Simpan Pembayaran</span>
+                          </button>
+                      </div>
+                  </div>
+              </form>
+          </div>
+      </div>
+
+      <div class="card shadow">
+          <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="fas fa-history me-2"></i>Riwayat Pembayaran SPP</h5>
+              <button class="btn btn-sm btn-outline-light" onclick="muatUlangHistori()"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+          </div>
+          <div class="card-body">
+              
+              <div id="filter-admin-spp" class="row g-2 mb-3 d-none">
+                  <div class="col-md-4">
+                      <label class="small fw-bold">Pencarian Nama/NIS</label>
+                      <div class="input-group">
+                          <input type="text" id="cari-spp-admin" class="form-control" placeholder="Ketik keyword...">
+                          <button class="btn btn-primary" onclick="cariHistoriAdmin()"><i class="fas fa-search"></i></button>
+                      </div>
+                  </div>
+                  <div class="col-md-3">
+                      <label class="small fw-bold">Filter Unit</label>
+                      <select id="filter-spp-unit" class="form-select" onchange="saringTabelLokal()">
+                          <option value="">-- Semua Unit --</option>
+                      </select>
+                  </div>
+                  <div class="col-md-3">
+                      <label class="small fw-bold">Filter Kelas</label>
+                      <select id="filter-spp-kelas" class="form-select" onchange="saringTabelLokal()">
+                          <option value="">-- Semua Kelas --</option>
+                      </select>
+                  </div>
+              </div>
+
+              <div class="table-responsive">
+                  <table class="table table-bordered table-hover align-middle mb-0" id="tabel-spp">
+                      <thead class="table-light">
+                          <tr>
+                              <th>Tanggal</th>
+                              <th>NIS</th>
+                              <th>Nama Siswa</th>
+                              <th>Unit / Kelas</th>
+                              <th>Bulan</th>
+                              <th>Nominal</th>
+                              <th>Metode</th>
+                              <th>Bukti</th>
+                              <th>Status</th>
+                              <th id="th-aksi-admin" class="d-none">Aksi Verifikasi</th>
+                          </tr>
+                      </thead>
+                      <tbody id="data-histori-spp">
+                          <tr>
+                              <td colspan="10" class="text-center text-muted">Memuat data histori...</td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+
+  </div>
+</section>
       <section id="sc-master" class="d-none"><div class="glass-card"><div class="d-flex justify-content-between mb-3"><h5 id="master-title" class="fw-800">Master Data</h5><button class="btn btn-primary btn-sm rounded-pill px-3" onclick="openModal()"><i class="fa fa-plus me-1"></i>Tambah</button></div><div id="tbl-area" class="table-responsive"></div></div></section>
       <section id="sc-users" class="d-none"><div class="glass-card"><h5 class="fw-800">Kelola Admin</h5><hr><button class="btn btn-primary btn-sm rounded-pill px-3 mb-3" onclick="openModal()"><i class="fa fa-plus me-1"></i>Tambah Admin</button><div id="tbl-users-area" class="table-responsive"></div></div></section>
       <section id="sc-rekap" class="d-none"><div class="glass-card"><h5 class="fw-800 mb-3">Laporan Kehadiran</h5><div class="bg-light p-3 rounded-4 mb-3"><div class="row g-2"><div class="col-md-3"><input type="date" id="f-start" class="form-control"></div><div class="col-md-3"><input type="date" id="f-end" class="form-control"></div><div class="col-md-6 d-flex gap-1"><button class="btn btn-primary w-100" onclick="loadRekap()" title="Cari Data"><i class="fa fa-search"></i> Cari</button><button class="btn btn-success w-100" onclick="exportData('xlsx')"><i class="fa fa-file-excel"></i> Excel</button><button class="btn btn-danger w-100" onclick="exportData('pdf')"><i class="fa fa-file-pdf"></i> PDF</button><button class="btn btn-dark w-100" onclick="exportData('print')"><i class="fa fa-print"></i> Cetak</button></div></div></div><div id="rekap-area" class="table-responsive"></div></div></section>
@@ -457,7 +592,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   /* GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA */
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxFGsFk_3Zr1XaanhdhIQKiMqGWjhnjrwBLnOWZSxIibf2vfkeuNCj7dTNsu-RWfytOGA/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxSBIiPHRXvylvr05983roVAJw0BQ65gkHwhyvHmfpTWwnlYrRH7zxYIDfXHhC9J1i-/exec";
 
   let userSession = {}, currentTable = '', editIdx = null, img64 = "", loc = {lat:0, long:0}, chartInstance = null, userChartInstance = null, refData = {};
   let isModelsLoaded = false, faceMatcher = null, streamActive = null, currentRegUser = null, currentRegSource = null;
@@ -560,29 +695,417 @@
   if(sc === 'sc-presensi-siswa') {
     loadPresensiSiswaMenu();
   }
+  if(sc === 'sc-spp') {
+    inisialisasiMenuSPP();
+  }
   if (window.innerWidth < 992) toggleSidebar();
 }
 
-  function updateUIBasedOnRole() {
+function updateUIBasedOnRole() {
   const adminNav = document.getElementById('nav-admin');
   const userCutiNav = document.getElementById('menu-cuti-user');
   const siswaPresensiNav = document.getElementById('menu-presensi-siswa');
+  const siswaSppNav = document.getElementById('menu-spp-siswa'); 
   const role = userSession.role.toLowerCase();
 
   if (role === 'admin') {
     adminNav.classList.remove('d-none');
     userCutiNav.classList.add('d-none');
     siswaPresensiNav.classList.remove('d-none');
+    if (siswaSppNav) siswaSppNav.classList.add('d-none');
   } else if (role === 'guru' || role === 'karyawan') {
     adminNav.classList.add('d-none');
     userCutiNav.classList.remove('d-none');
     siswaPresensiNav.classList.remove('d-none');
+    if (siswaSppNav) siswaSppNav.classList.add('d-none');
+  } else if (role === 'siswa') {
+    adminNav.classList.add('d-none');
+    userCutiNav.classList.add('d-none');
+    siswaPresensiNav.classList.add('d-none');
+    if (siswaSppNav) siswaSppNav.classList.remove('d-none');
   } else {
     adminNav.classList.add('d-none');
     userCutiNav.classList.add('d-none');
     siswaPresensiNav.classList.add('d-none');
+    if (siswaSppNav) siswaSppNav.classList.add('d-none');
   }
 }
+
+function inisialisasiMenuSPP() {
+  if (typeof userSession === "undefined" || !userSession || !userSession.role) {
+    console.error("Session pengguna tidak ditemukan atau belum login.");
+    return;
+  }
+
+  const panelAdmin = document.getElementById("panel-admin-spp");
+  const filterAdmin = document.getElementById("filter-admin-spp");
+  const inputNis = document.getElementById("spp-nis");
+  
+  if (document.getElementById("form-bayar-spp")) {
+    document.getElementById("form-bayar-spp").reset();
+  }
+  clearFormSiswa();
+
+  const role = userSession.role.toLowerCase();
+
+  if (role === 'admin') {
+    if (panelAdmin) panelAdmin.classList.remove("d-none");
+    if (filterAdmin) filterAdmin.classList.remove("d-none");
+    
+    if (inputNis) {
+      inputNis.readOnly = false;
+      inputNis.placeholder = "Ketik NIS & tekan Tab/Enter";
+    }
+    
+    loadHistoriSPP("");
+  } else {
+    if (panelAdmin) panelAdmin.classList.add("d-none");
+    if (filterAdmin) filterAdmin.classList.add("d-none");
+    
+    if (inputNis) {
+      inputNis.value = userSession.u || ""; 
+      inputNis.readOnly = true;
+    }
+    
+    loadHistoriSPP(userSession.u || "");
+  }
+}
+	
+let cacheHistoriSpp = [];
+
+async function inisialisasiMenuSPP() {
+  if (!userSession || !userSession.role) return;
+
+  const role = userSession.role.toLowerCase();
+  await muatDropdownReferensiDinamis();
+
+  const formSpp = document.getElementById("form-bayar-spp");
+  if (formSpp) formSpp.reset();
+  clearFormSiswa();
+
+  const inputNis = document.getElementById("spp-nis");
+  const panelAdmin = document.getElementById("filter-admin-spp");
+  const thAksiAdmin = document.getElementById("th-aksi-admin");
+  const rowBukti = document.getElementById("row-bukti-transfer");
+
+  if (role === 'admin') {
+    document.getElementById("title-panel-spp").innerHTML = `<i class="fas fa-calculator me-2"></i>Loket Pembayaran SPP (Admin)`;
+    document.getElementById("text-btn-spp").innerText = "Simpan Transaksi (Lunas)";
+    
+    if (panelAdmin) panelAdmin.classList.remove("d-none");
+    if (thAksiAdmin) thAksiAdmin.classList.remove("d-none");
+    
+    if (inputNis) {
+      inputNis.readOnly = false;
+      inputNis.disabled = false;
+      inputNis.placeholder = "Ketik NIS lalu tekan Enter";
+      inputNis.value = ""; 
+    }
+    
+    document.getElementById("spp-unit").disabled = false;
+    document.getElementById("spp-kelas").disabled = false;
+    if (rowBukti) rowBukti.classList.add("d-none");
+    document.getElementById("spp-file").required = false;
+
+    loadHistoriSPP(""); 
+  } 
+  else if (role === 'siswa') {
+    document.getElementById("title-panel-spp").innerHTML = `<i class="fas fa-wallet me-2"></i>Konfirmasi Pembayaran SPP Mandiri`;
+    document.getElementById("text-btn-spp").innerText = "Kirim Bukti Pembayaran (Pending)";
+    
+    if (panelAdmin) panelAdmin.classList.add("d-none");
+    if (thAksiAdmin) thAksiAdmin.classList.add("d-none");
+
+    // Gunakan data dari userSession yang sudah diperbarui
+    if (inputNis) {
+      inputNis.value = userSession.nis || "-"; 
+      inputNis.readOnly = true; 
+      inputNis.style.cursor = 'not-allowed';
+    }
+    document.getElementById("spp-nama").value = userSession.nama || "-";
+    
+    const unitSelect = document.getElementById("spp-unit");
+    if(unitSelect.querySelector(`option[value="${userSession.unit}"]`)) {
+       unitSelect.value = userSession.unit;
+    }
+    const kelasSelect = document.getElementById("spp-kelas");
+    if(kelasSelect.querySelector(`option[value="${userSession.kelas}"]`)) {
+       kelasSelect.value = userSession.kelas;
+    }
+
+    unitSelect.disabled = true;
+    kelasSelect.disabled = true;
+    
+    if (rowBukti) rowBukti.classList.remove("d-none");
+    document.getElementById("spp-file").required = true;
+
+    loadHistoriSPP(userSession.nis || userSession.username); 
+  }
+}
+
+async function muatDropdownReferensiDinamis() {
+  try {
+    const res = await callGAS("getRefData", {});
+    if (res) {
+      const listUnit = res["Unit"] || res["unit"] || [];
+      const listKelas = res["Kelas"] || res["kelas"] || [];
+
+      const optUnit = ['spp-unit', 'filter-spp-unit'];
+      const optKelas = ['spp-kelas', 'filter-spp-kelas'];
+
+      optUnit.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.innerHTML = id.startsWith('filter') ? '<option value="">-- Semua Unit --</option>' : '<option value="">-- Pilih Unit --</option>';
+        listUnit.forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
+      });
+
+      optKelas.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.innerHTML = id.startsWith('filter') ? '<option value="">-- Semua Kelas --</option>' : '<option value="">-- Pilih Kelas --</option>';
+        listKelas.forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
+      });
+    }
+  } catch (e) { console.error("Gagal menarik data_referensi:", e); }
+}
+
+async function cariSiswaOtomatis() {
+  const nisInput = document.getElementById("spp-nis").value.trim();
+  if (!nisInput || nisInput === "Memuat NIS...") return;
+
+  document.getElementById("spp-nama").value = "Mencari profil...";
+  try {
+    const res = await callGAS("getSiswaByNis", { nis: nisInput });
+    if (res && res.success && res.data) {
+      document.getElementById("spp-nama").value = res.data.nama || "-";
+      document.getElementById("spp-unit").value = res.data.unit || "";
+      document.getElementById("spp-kelas").value = res.data.kelas || "";
+    } else {
+      alert("Siswa tidak ditemukan!");
+      clearFormSiswa();
+    }
+  } catch (error) { 
+    clearFormSiswa(); 
+  }
+}
+
+function convertFileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
+async function handleBayarSPP(event) {
+  event.preventDefault();
+  const role = userSession.role.toLowerCase();
+
+  const loadingSpinner = document.getElementById("spp-loading");
+  const btnSimpan = document.getElementById("btn-simpan-spp");
+  
+  if (loadingSpinner) loadingSpinner.classList.remove("d-none");
+  if (btnSimpan) btnSimpan.disabled = true;
+
+  let fileObj = { base64: "", name: "" };
+  const fileInput = document.getElementById("spp-file");
+  if (fileInput && fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    try {
+      const base64Str = await convertFileToBase64(file);
+      fileObj.base64 = base64Str;
+      fileObj.name = file.name;
+    } catch (err) {
+      alert("Gagal membaca file bukti pembayaran.");
+      if (loadingSpinner) loadingSpinner.classList.add("d-none");
+      if (btnSimpan) btnSimpan.disabled = false;
+      return;
+    }
+  }
+
+  let statusTransaksi = (role === "admin") ? "Berhasil" : "Pending";
+  
+  let nisValue = document.getElementById("spp-nis").value.trim();
+  if ((!nisValue || nisValue === "Memuat NIS...") && role === "siswa") {
+    nisValue = userSession.u || userSession.username || "";
+  }
+
+  const dataPayload = {
+    nis: nisValue,
+    nama: document.getElementById("spp-nama").value,
+    unit: document.getElementById("spp-unit").value,
+    kelas: document.getElementById("spp-kelas").value,
+    bulan: document.getElementById("spp-bulan").value,
+    nominal: document.getElementById("spp-nominal").value,
+    jenis_pembayaran: document.getElementById("spp-metode").value,
+    status: statusTransaksi,
+    buktiBase64: fileObj.base64,
+    buktiNamaFile: fileObj.name
+  };
+
+  if (role === "siswa") {
+    dataPayload.unit = userSession.unit;
+    dataPayload.kelas = userSession.kelas;
+  }
+
+  try {
+    const res = await callGAS("prosesBayarSPP", dataPayload);
+    if (res && res.success) {
+      alert(role === "admin" ? "Pembayaran SPP sukses disimpan ke database!" : "pembayaran berhasil terkirim! Silakan tunggu verifikasi admin.");
+      inisialisasiMenuSPP(); 
+    } else {
+      alert("Gagal menyimpan: " + (res.message || "Terjadi kesalahan backend."));
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Sistem gagal terhubung ke backend Google Sheets.");
+  } finally {
+    if (loadingSpinner) loadingSpinner.classList.add("d-none");
+    if (btnSimpan) btnSimpan.disabled = false;
+  }
+}
+
+async function loadHistoriSPP(filterNis = "") {
+  const tbody = document.getElementById("data-histori-spp");
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="10" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Memuat tabel riwayat...</td></tr>`;
+
+  try {
+    const res = await callGAS("getHistorySPP", { nisOrNama: filterNis });
+    const role = userSession.role.toLowerCase();
+
+    if (res && res.success && res.data) {
+      cacheHistoriSpp = res.data;
+      renderTabelSpp(cacheHistoriSpp, role);
+    } else {
+      tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted">Belum ada riwayat transaksi.</td></tr>`;
+    }
+  } catch (error) {
+    tbody.innerHTML = `<tr><td colspan="10" class="text-center text-danger">Gagal menghubungi server database.</td></tr>`;
+  }
+}
+
+function renderTabelSpp(arrData, role) {
+  const tbody = document.getElementById("data-histori-spp");
+  if(!tbody) return;
+  
+  if(arrData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted">Data pencarian tidak ditemukan.</td></tr>`;
+    return;
+  }
+
+  let html = "";
+  arrData.forEach(item => {
+    let badge = `<span class="badge bg-success">Berhasil</span>`;
+    if(item.status === "Pending") badge = `<span class="badge bg-warning text-dark">Pending</span>`;
+    if(item.status === "Gagal") badge = `<span class="badge bg-danger">Gagal</span>`;
+
+    let linkBukti = "-";
+    if(item.buktiUrl && item.buktiUrl.startsWith("http")) {
+      linkBukti = `<a href="${item.buktiUrl}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1" style="font-size:11px;"><i class="fas fa-image"></i> Lihat</a>`;
+    }
+
+    let kolomAksiAdmin = "";
+    if (role === "admin") {
+      if (item.status === "Pending") {
+        kolomAksiAdmin = `
+          <td class="text-center">
+            <button class="btn btn-xs btn-success py-0 px-1 small" onclick="eksekusiApprovalSpp('${item.id}', 'Berhasil')"><i class="fa fa-check"></i></button>
+            <button class="btn btn-xs btn-danger py-0 px-1 small" onclick="eksekusiApprovalSpp('${item.id}', 'Gagal')"><i class="fa fa-times"></i></button>
+          </td>`;
+      } else {
+        kolomAksiAdmin = `<td class="text-center text-muted small">- Selesai -</td>`;
+      }
+    }
+
+    html += `
+      <tr>
+        <td><small>${item.tanggal || '-'}</small></td>
+        <td>${item.nis || '-'}</td>
+        <td><strong>${item.nama || '-'}</strong></td>
+        <td><small>${item.unit || '-'} / ${item.kelas || '-'}</small></td>
+        <td><span class="text-primary fw-bold">${item.bulan || '-'}</span></td>
+        <td>Rp ${(Number(item.nominal) || 0).toLocaleString('id-ID')}</td>
+        <td><small class="text-muted">${item.metode || '-'}</small></td>
+        <td class="text-center">${linkBukti}</td>
+        <td class="text-center">${badge}</td>
+        ${kolomAksiAdmin}
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+async function eksekusiApprovalSpp(idBayar, statusTarget) {
+  if(!confirm(`Apakah Anda yakin ingin menandai transaksi ini sebagai ${statusTarget}?`)) return;
+  try {
+    const res = await callGAS("approveBayarSPP", { idBayar: idBayar, statusBaru: statusTarget });
+    if(res && res.success) {
+      alert(res.message);
+      muatUlangHistori();
+    } else {
+      alert("Gagal memperbarui status: " + res.message);
+    }
+  } catch(e) { alert("Terjadi kesalahan sistem."); }
+}
+
+function saringTabelLokal() {
+  const fUnit = document.getElementById("filter-spp-unit").value.toLowerCase();
+  const fKelas = document.getElementById("filter-spp-kelas").value.toLowerCase();
+  const role = userSession.role.toLowerCase();
+
+  let hasilSaring = cacheHistoriSpp;
+
+  if (fUnit) {
+    hasilSaring = hasilSaring.filter(x => x.unit && x.unit.toLowerCase() === fUnit);
+  }
+  if (fKelas) {
+    hasilSaring = hasilSaring.filter(x => x.kelas && x.kelas.toLowerCase() === fKelas);
+  }
+
+  renderTabelSpp(hasilSaring, role);
+}
+
+function clearFormSiswa() {
+  if(document.getElementById("spp-nama")) document.getElementById("spp-nama").value = "";
+  if(document.getElementById("spp-unit")) document.getElementById("spp-unit").value = "";
+  if(document.getElementById("spp-kelas")) document.getElementById("spp-kelas").value = "";
+}
+
+function toggleUploadBukti() {
+  const role = userSession.role.toLowerCase();
+  if (role === 'siswa') return;
+
+  const metode = document.getElementById("spp-metode").value;
+  const rowBukti = document.getElementById("row-bukti-transfer");
+  if (!rowBukti) return;
+  
+  if (metode && metode.startsWith("Transfer")) {
+    rowBukti.classList.remove("d-none");
+  } else {
+    rowBukti.classList.add("d-none");
+    document.getElementById("spp-file").value = "";
+  }
+}
+
+function muatUlangHistori() {
+  const role = userSession.role.toLowerCase();
+  if (role === "admin") {
+    loadHistoriSPP("");
+  } else {
+    const inputNis = document.getElementById("spp-nis").value;
+    loadHistoriSPP(inputNis && inputNis !== "Memuat NIS..." ? inputNis : userSession.u);
+  }
+}
+
+function cariHistoriAdmin() {
+  const keyword = document.getElementById("cari-spp-admin").value.trim();
+  loadHistoriSPP(keyword);
+}
+	
   function hitungDurasi() {
   const mulai = document.getElementById('cuti-mulai').value;
   const selesai = document.getElementById('cuti-selesai').value;
